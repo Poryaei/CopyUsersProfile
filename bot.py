@@ -148,7 +148,6 @@ async def answer(event):
                 for item in participants.users:
                     if item.username != None:
                         await bot.download_profile_photo(item.username, file=f'saves/{item.username}.jpg')
-            
             await event.reply('End')
        
 
