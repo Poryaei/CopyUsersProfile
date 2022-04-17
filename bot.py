@@ -1,30 +1,11 @@
 # ------- Import Library's
-import asyncio
-import re
 from telethon.tl import types as tl_telethon_types
-from telethon.tl.types import MessageMediaPoll, ReplyInlineMarkup
+from telethon.sync import TelegramClient, functions, types, events, errors
 from telethon.tl.functions.messages import ImportChatInviteRequest
-from telethon.tl.custom import Button, button
-from telethon.tl.functions.account import UpdateUsernameRequest
-from telethon.tl.types.auth import SentCodeTypeApp
-from telethon.sync import TelegramClient, functions, types, events, errors, connection
-from telethon.client import buttons
-from asyncio import tasks
-from telethon.tl.functions.channels import JoinChannelRequest, LeaveChannelRequest, DeleteMessagesRequest
-from telethon.tl.functions.messages import ImportChatInviteRequest, GetBotCallbackAnswerRequest
 
 import os
 import sys
 import time
-import datetime
-import psutil
-import json
-import requests
-from pathlib import Path
-import cv2
-import random
-from faker import Faker
-
 #-------- Check Prefrences
 for dirr in ['saves']:
     if not os.path.exists(dirr):
@@ -95,14 +76,11 @@ async def join(event, link):
 async def answer(event):
     text = event.raw_text
     user_id = event.sender_id
-    chat_id = event.chat_id
-    msgid = event.message.id
 
     #--- Filter Messages
     if user_id != admin:
         return
     
-    # await bot.forward_messages(int(user_id), messages=event.message)
     
     #--- Ping
     if text == "/ping":
@@ -170,6 +148,8 @@ async def answer(event):
                 for item in participants.users:
                     if item.username != None:
                         await bot.download_profile_photo(item.username, file=f'saves/{item.username}.jpg')
+            
+            await event.reply('End')
        
 
 
