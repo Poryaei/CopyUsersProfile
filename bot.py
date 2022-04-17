@@ -41,7 +41,7 @@ admin = 591922827
 #--- C
 if len(sys.argv) > 1:
     if sys.argv[1] == "re":
-        bot.send_message(admin, "🔄 Bot Restarted")
+        bot.send_message("admin", "🔄 Bot Restarted")
 # -------- Functions
 
 
