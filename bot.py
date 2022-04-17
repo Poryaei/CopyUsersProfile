@@ -41,7 +41,7 @@ admin = 591922827
 #--- C
 if len(sys.argv) > 1:
     if sys.argv[1] == "re":
-        bot.send_message("admin", "🔄 Bot Restarted")
+        bot.send_message(admin, "🔄 Bot Restarted")
 # -------- Functions
 
 
@@ -60,14 +60,14 @@ async def answer(event):
     
     #--- Ping
     if text == "/ping":
-        await event.edit('Pong ;)')
+        await event.reply('Pong ;)')
         return
     
     #--- Restart
     elif text == "/re":
         pid = os.getpid()
         fileName = sys.argv[0]
-        await event.edit('Restarting Bot...')
+        await event.reply('Restarting Bot...')
         os.system(f"Taskkill /PID {pid} /F && python {fileName} re")
     
        
