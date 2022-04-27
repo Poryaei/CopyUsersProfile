@@ -1,4 +1,5 @@
 # ------- Import Library's
+from asyncio.windows_events import NULL
 from telethon.tl import types as tl_telethon_types
 from telethon.sync import TelegramClient, functions, types, events, errors
 from telethon.tl.functions.messages import ImportChatInviteRequest
@@ -6,6 +7,7 @@ from telethon.tl.functions.messages import ImportChatInviteRequest
 import os
 import sys
 import time
+import requests
 #-------- Check Prefrences
 for dirr in ['saves']:
     if not os.path.exists(dirr):
@@ -70,6 +72,14 @@ async def join(event, link):
     except Exception as e :
         print (":::::::::::::::::::" , e.__class__ , str(e))
         return -1
+    
+def findTelegramPhoto(username):
+    username = username.replace("@", "")
+    r = requests.get(f'https://t.me/{username}')
+    if not 'tgme_page_photo_image' in r.text:
+        return NULL
+    return r.text.split('<img class="tgme_page_photo_image" src="')[1].split('"')[0]
+
 
 
 # -------- Start Receiving Message's
@@ -147,7 +157,8 @@ async def answer(event):
                 offset += len(participants.users)
                 for item in participants.users:
                     if item.username != None:
-                        await bot.download_profile_photo(item.username, file=f'saves/{item.username}.jpg')
+                        # await bot.download_profile_photo(item.username, file=f'saves/{item.username}.jpg')
+
             await event.reply('End')
        
 
