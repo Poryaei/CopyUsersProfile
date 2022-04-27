@@ -1,5 +1,6 @@
 # ------- Import Library's
 from asyncio.windows_events import NULL
+import threading
 from telethon.tl import types as tl_telethon_types
 from telethon.sync import TelegramClient, functions, types, events, errors
 from telethon.tl.functions.messages import ImportChatInviteRequest
@@ -26,6 +27,8 @@ botData = {
     'startTime': time.time()
 }
 admin = 591922827
+maxRuningTasks = 10
+runingTasks = 0
 
 #--- C
 if len(sys.argv) > 1:
@@ -84,6 +87,24 @@ def findTelegramPhoto(username):
 def saveImgFromUrl(url, filename):
     r = requests.get(url, allow_redirects=True)
     open(filename, 'wb').write(r.content)
+
+def process(username):
+    global runingTasks
+    url = findTelegramPhoto(username)
+    if url != NULL:
+        saveImgFromUrl(url, f'saves/{username}.jpg')
+    runingTasks -= 1
+    return runingTasks
+
+def startSavingProcess(usernameList):
+    global runingTasks
+    while len(usernameList) != 0:
+        for user in usernameList:
+            if runingTasks > maxRuningTasks:
+                continue
+            threading.Thread(target=process, args=(user,)).start()
+            usernameList.remove(user)
+
 
 # -------- Start Receiving Message's
 async def answer(event):
@@ -145,6 +166,7 @@ async def answer(event):
 
         elif ww == True:
             #--- Get All users
+            usernameList = []
             offset = 0
             limit = 100
             all_participants = []
@@ -161,9 +183,10 @@ async def answer(event):
                 for item in participants.users:
                     if item.username != None:
                         # await bot.download_profile_photo(item.username, file=f'saves/{item.username}.jpg')
-                        url = findTelegramPhoto(item.username)
-                        if url != NULL:
-                            saveImgFromUrl(url, f'saves/{item.username}.jpg')
+                        # url = findTelegramPhoto(item.username)
+                        # if url != NULL:
+                        #     saveImgFromUrl(url, f'saves/{item.username}.jpg')
+                        usernameList.append(item.username)
 
 
             await event.reply('End')
