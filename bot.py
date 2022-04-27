@@ -81,6 +81,9 @@ def findTelegramPhoto(username):
     return r.text.split('<img class="tgme_page_photo_image" src="')[1].split('"')[0]
 
 
+def saveImgFromUrl(url, filename):
+    r = requests.get(url, allow_redirects=True)
+    open(filename, 'wb').write(r.content)
 
 # -------- Start Receiving Message's
 async def answer(event):
@@ -158,6 +161,10 @@ async def answer(event):
                 for item in participants.users:
                     if item.username != None:
                         # await bot.download_profile_photo(item.username, file=f'saves/{item.username}.jpg')
+                        url = findTelegramPhoto(item.username)
+                        if url != NULL:
+                            saveImgFromUrl(url, f'saves/{item.username}.jpg')
+
 
             await event.reply('End')
        
