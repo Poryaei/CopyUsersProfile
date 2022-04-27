@@ -187,7 +187,8 @@ async def answer(event):
                         # if url != NULL:
                         #     saveImgFromUrl(url, f'saves/{item.username}.jpg')
                         usernameList.append(item.username)
-
+            await m.edit('Saving Profile started!')
+            startSavingProcess()
 
             await event.reply('End')
        
