@@ -120,6 +120,8 @@ def startSavingProcess(usernameList):
     botData['saved'] = 0
     botData['problem'] = 0
     botData['total'] = len(usernameList)
+    botData['lastedit'] = time.time()
+    print('[!] Task starting')
     while len(usernameList) != 0 and process:
         for user in usernameList:
             if runingTasks > maxRuningTasks:
@@ -134,9 +136,11 @@ def startSavingProcess(usernameList):
     process = False
 
 
+
 # -------- Start Receiving Message's
 async def answer(event):
     global process
+    global botData
     text = event.raw_text
     user_id = event.sender_id
 
@@ -219,10 +223,15 @@ async def answer(event):
             process = True
             await m.edit('Saving Profile started! send /cancel to stop')
             botData['event'] = m
+            botData['saved'] = 0
+            botData['problem'] = 0
+            botData['total'] = len(usernameList)
+            threading.Thread(target=startSavingProcess, args=(usernameList,)).start()
             asyncio.create_task(showProcess())
-            startSavingProcess(usernameList)
+            print("H")
+            # startSavingProcess(usernameList)
 
-            await event.reply('End')
+            
     
     # Cancel
     elif text == '/cancel':
@@ -234,15 +243,22 @@ async def showProcess():
     global botData
     startT = time.time()
     startA = time.time()
-    while True:
-        if process == False:
-            break
-        if process and time.time() - startT >= 5:
+    print('[!] Alert Starting')
+    while True :
+        if not time.time() - botData['lastedit'] >= 5:
+            continue
+        if process:
             total = botData['total']
             saved = botData['saved']
             error = botData['problem']
-            await botData['event'].edit(f'total: {total}\nsaved: {saved}\nerror: {error}\n\nsend /cancel to stop')
-            startT = time.time()
+            try:
+                await botData['event'].edit(f'total: {total}\nsaved: {saved}\nerror: {error}\n\nsend /cancel to stop')
+            except:
+                pass
+            botData['lastedit'] = time.time()
+        else:
+            await botData['event'].edit(f'total: {total}\nsaved: {saved}\nerror: {error}\n\nend')
+            break
         
 
 #------- Handler
