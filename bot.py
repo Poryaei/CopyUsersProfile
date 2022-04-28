@@ -9,6 +9,7 @@ import os
 import sys
 import time
 import requests
+import aiocron
 #-------- Check Prefrences
 for dirr in ['saves']:
     if not os.path.exists(dirr):
@@ -97,25 +98,32 @@ def saveImgFromUrl(url, filename):
     except:
         pass
 
-def process(username):
+def botprocess(username):
     global runingTasks
+    global botData
     try:
         url = findTelegramPhoto(username)
         if url != NULL:
             saveImgFromUrl(url, f'saves/{username}.jpg')
+            botData['saved'] += 1
     except Exception as e:
         print(e)
+        botData['problem'] += 1
     runingTasks -= 1
     return runingTasks
 
 def startSavingProcess(usernameList):
     global runingTasks
     global process
+    global botData
+    botData['saved'] = 0
+    botData['problem'] = 0
+    botData['total'] = len(usernameList)
     while len(usernameList) != 0 and process:
         for user in usernameList:
             if runingTasks > maxRuningTasks:
                 continue
-            threading.Thread(target=process, args=(user,)).start()
+            threading.Thread(target=botprocess, args=(user,)).start()
             runingTasks += 1
             usernameList.remove(user)
             if len(usernameList) == 0 or process == False:
@@ -209,6 +217,7 @@ async def answer(event):
                         usernameList.append(item.username)
             process = True
             await m.edit('Saving Profile started! send /cancel to stop')
+            botData['event'] = m
             startSavingProcess(usernameList)
 
             await event.reply('End')
@@ -225,7 +234,13 @@ async def answer(event):
 async def my_event_handler(event):
     await answer(event)
 
+#--------- Aio Cron
+@aiocron.crontab('*/1 * * * *')
+async def cr1():
+    global process
+    if process:
 
+    
 
 
 bot.run_until_disconnected()
