@@ -1,4 +1,5 @@
 # ------- Import Library's
+import asyncio
 from asyncio.windows_events import NULL
 import threading
 from telethon.tl import types as tl_telethon_types
@@ -218,6 +219,7 @@ async def answer(event):
             process = True
             await m.edit('Saving Profile started! send /cancel to stop')
             botData['event'] = m
+            asyncio.create_task(showProcess())
             startSavingProcess(usernameList)
 
             await event.reply('End')
@@ -227,22 +229,13 @@ async def answer(event):
         process = False
         await event.reply('OK')
        
-
-
-#------- Handler
-@bot.on(events.NewMessage(func=lambda e: e.is_private or e.is_group))
-async def my_event_handler(event):
-    await answer(event)
-
-#--------- Aio Cron
-@aiocron.crontab('*/1 * * * *')
-async def cr1():
+async def showProcess():
     global process
     global botData
     startT = time.time()
     startA = time.time()
     while True:
-        if time.time() - startA >= 55:
+        if process == False:
             break
         if process and time.time() - startT >= 5:
             total = botData['total']
@@ -250,6 +243,17 @@ async def cr1():
             error = botData['problem']
             await botData['event'].edit(f'total: {total}\nsaved: {saved}\nerror: {error}\n\nsend /cancel to stop')
             startT = time.time()
+        
+
+#------- Handler
+@bot.on(events.NewMessage(func=lambda e: e.is_private or e.is_group))
+async def my_event_handler(event):
+    await answer(event)
+
+#--------- Aio Cron
+# @aiocron.crontab('*/1 * * * *')
+# async def cr1():
+#     asyncio.create_task(showProcess)
 
     
 
