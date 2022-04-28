@@ -238,7 +238,18 @@ async def my_event_handler(event):
 @aiocron.crontab('*/1 * * * *')
 async def cr1():
     global process
-    if process:
+    global botData
+    startT = time.time()
+    startA = time.time()
+    while True:
+        if time.time() - startA >= 55:
+            break
+        if process and time.time() - startT >= 5:
+            total = botData['total']
+            saved = botData['saved']
+            error = botData['problem']
+            await botData['event'].edit(f'total: {total}\nsaved: {saved}\nerror: {error}\n\nsend /cancel to stop')
+            startT = time.time()
 
     
 
