@@ -78,21 +78,32 @@ async def join(event, link):
     
 def findTelegramPhoto(username):
     username = username.replace("@", "")
-    r = requests.get(f'https://t.me/{username}')
-    if not 'tgme_page_photo_image' in r.text:
-        return NULL
-    return r.text.split('<img class="tgme_page_photo_image" src="')[1].split('"')[0]
+    try:
+        r = requests.get(f'https://t.me/{username}', timeout=10)
+        if not 'tgme_page_photo_image' in r.text:
+            return NULL
+        return r.text.split('<img class="tgme_page_photo_image" src="')[1].split('"')[0]
+    except Exception as e:
+        print(e)
+        
+    return NULL
 
 
 def saveImgFromUrl(url, filename):
-    r = requests.get(url, allow_redirects=True)
-    open(filename, 'wb').write(r.content)
+    try:
+        r = requests.get(url, allow_redirects=True)
+        open(filename, 'wb').write(r.content)
+    except:
+        pass
 
 def process(username):
     global runingTasks
-    url = findTelegramPhoto(username)
-    if url != NULL:
-        saveImgFromUrl(url, f'saves/{username}.jpg')
+    try:
+        url = findTelegramPhoto(username)
+        if url != NULL:
+            saveImgFromUrl(url, f'saves/{username}.jpg')
+    except Exception as e:
+        print(e)
     runingTasks -= 1
     return runingTasks
 
@@ -103,6 +114,7 @@ def startSavingProcess(usernameList):
             if runingTasks > maxRuningTasks:
                 continue
             threading.Thread(target=process, args=(user,)).start()
+            runingTasks += 1
             usernameList.remove(user)
 
 
@@ -188,7 +200,7 @@ async def answer(event):
                         #     saveImgFromUrl(url, f'saves/{item.username}.jpg')
                         usernameList.append(item.username)
             await m.edit('Saving Profile started!')
-            startSavingProcess()
+            startSavingProcess(usernameList)
 
             await event.reply('End')
        
