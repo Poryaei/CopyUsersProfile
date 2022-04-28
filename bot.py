@@ -10,7 +10,6 @@ import os
 import sys
 import time
 import requests
-import aiocron
 #-------- Check Prefrences
 for dirr in ['saves']:
     if not os.path.exists(dirr):
@@ -265,11 +264,6 @@ async def showProcess():
 @bot.on(events.NewMessage(func=lambda e: e.is_private or e.is_group))
 async def my_event_handler(event):
     await answer(event)
-
-#--------- Aio Cron
-# @aiocron.crontab('*/1 * * * *')
-# async def cr1():
-#     asyncio.create_task(showProcess)
 
     
 
