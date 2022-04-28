@@ -29,6 +29,7 @@ botData = {
 admin = 591922827
 maxRuningTasks = 10
 runingTasks = 0
+process = False
 
 #--- C
 if len(sys.argv) > 1:
@@ -109,17 +110,24 @@ def process(username):
 
 def startSavingProcess(usernameList):
     global runingTasks
-    while len(usernameList) != 0:
+    global process
+    while len(usernameList) != 0 and process:
         for user in usernameList:
             if runingTasks > maxRuningTasks:
                 continue
             threading.Thread(target=process, args=(user,)).start()
             runingTasks += 1
             usernameList.remove(user)
+            if len(usernameList) == 0 or process == False:
+                break
+        if len(usernameList) == 0 or process == False:
+            break
+    process = False
 
 
 # -------- Start Receiving Message's
 async def answer(event):
+    global process
     text = event.raw_text
     user_id = event.sender_id
 
@@ -199,10 +207,16 @@ async def answer(event):
                         # if url != NULL:
                         #     saveImgFromUrl(url, f'saves/{item.username}.jpg')
                         usernameList.append(item.username)
-            await m.edit('Saving Profile started!')
+            process = True
+            await m.edit('Saving Profile started! send /cancel to stop')
             startSavingProcess(usernameList)
 
             await event.reply('End')
+    
+    # Cancel
+    elif text == '/cancel':
+        process = False
+        await event.reply('OK')
        
 
 
